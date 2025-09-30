@@ -1,0 +1,167 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Add New Trip{% endblock %}
+
+{% block page_title %}Add New Trip{% endblock %}
+{% block page_subtitle %}Schedule a new trip on an existing route{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'list_travellors' %}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+    <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+    </svg>
+    Back to Trips
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="bg-white shadow sm:rounded-lg">
+    <form method="post" class="space-y-8 divide-y divide-gray-200">
+        {% csrf_token %}
+        
+        <div class="px-4 py-5 sm:p-6">
+            <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                <!-- Route Selection -->
+                <div class="sm:col-span-4">
+                    <label for="{{ form.route.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                        {{ form.route.label }}
+                    </label>
+                    <div class="mt-1">
+                        <select id="{{ form.route.id_for_label }}" name="{{ form.route.html_name }}"
+                                class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                            <option value="">Select a route</option>
+                            {% for value, label in form.route.field.choices %}
+                            <option value="{{ value }}" {% if form.route.value == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% if form.route.errors %}
+                    <p class="mt-2 text-sm text-red-600">
+                        {{ form.route.errors.0 }}
+                    </p>
+                    {% endif %}
+                    {% if form.route.help_text %}
+                    <p class="mt-2 text-sm text-gray-500">{{ form.route.help_text }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Departure Time -->
+                <div class="sm:col-span-3">
+                    <label for="{{ form.departure_time.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                        {{ form.departure_time.label }}
+                    </label>
+                    <div class="mt-1">
+                        <input type="datetime-local" 
+                               id="{{ form.departure_time.id_for_label }}" 
+                               name="{{ form.departure_time.html_name }}"
+                               value="{{ form.departure_time.value|default:'' }}"
+                               class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                    </div>
+                    {% if form.departure_time.errors %}
+                    <p class="mt-2 text-sm text-red-600">
+                        {{ form.departure_time.errors.0 }}
+                    </p>
+                    {% endif %}
+                    {% if form.departure_time.help_text %}
+                    <p class="mt-2 text-sm text-gray-500">{{ form.departure_time.help_text }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Vehicle Capacity -->
+                <div class="sm:col-span-3">
+                    <label for="{{ form.vehicle_capacity.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                        {{ form.vehicle_capacity.label }}
+                    </label>
+                    <div class="mt-1 relative rounded-md shadow-sm">
+                        <input type="number" 
+                               id="{{ form.vehicle_capacity.id_for_label }}" 
+                               name="{{ form.vehicle_capacity.html_name }}"
+                               value="{{ form.vehicle_capacity.value|default:'' }}"
+                               min="1"
+                               class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                               placeholder="Enter number of seats">
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    {% if form.vehicle_capacity.errors %}
+                    <p class="mt-2 text-sm text-red-600">
+                        {{ form.vehicle_capacity.errors.0 }}
+                    </p>
+                    {% endif %}
+                    {% if form.vehicle_capacity.help_text %}
+                    <p class="mt-2 text-sm text-gray-500">{{ form.vehicle_capacity.help_text }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
+            <div class="flex justify-end space-x-3">
+                <a href="{% url 'list_travellors' %}" 
+                   class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Cancel
+                </a>
+                <button type="submit"
+                        class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Schedule Trip
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% if form.route.value %}
+<div class="mt-8">
+    <div class="bg-white shadow sm:rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Selected Route Details</h3>
+            <div class="mt-5 border-t border-gray-200 pt-4">
+                <dl class="divide-y divide-gray-200">
+                    <div class="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
+                        <dt class="text-sm font-medium text-gray-500">Route Name</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ form.route.value.name }}</dd>
+                    </div>
+                    {% if form.route.value.description %}
+                    <div class="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
+                        <dt class="text-sm font-medium text-gray-500">Description</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ form.route.value.description }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if form.route.value.stops.exists %}
+                    <div class="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
+                        <dt class="text-sm font-medium text-gray-500">Stops</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                            <ul class="border border-gray-200 rounded-md divide-y divide-gray-200">
+                                {% for stop in form.route.value.stops.all %}
+                                <li class="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
+                                    <div class="w-0 flex-1 flex items-center">
+                                        <svg class="flex-shrink-0 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                        <span class="ml-2 flex-1 w-0 truncate">{{ stop.name }}</span>
+                                    </div>
+                                    <div class="ml-4 flex-shrink-0">
+                                        <span class="font-medium text-indigo-600 hover:text-indigo-500">Stop {{ forloop.counter }}</span>
+                                    </div>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </dd>
+                    </div>
+                    {% endif %}
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,31 @@
+from django.urls import path
+from django.contrib.auth import views as auth_views
+from . import views
+from .views import GoogleLogin, BookTravellerView, SearchTravellersView, StopListView, UserBookingsView, CustomerSignupView
+
+urlpatterns = [
+    # Auth
+    path('login/', auth_views.LoginView.as_view(), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('auth/google/', GoogleLogin.as_view(), name='google_login'),
+    path('customer-signup/', CustomerSignupView.as_view(), name='customer_signup'),
+    path('book-traveller/', BookTravellerView.as_view(), name='book_traveller'),
+    path('vendor-bookings/', views.vendor_bookings_view, name='vendor_bookings'),
+    path('search-travellers/', SearchTravellersView.as_view(), name='search_travellers'),
+    path('stops/', StopListView.as_view(), name='stop_list'),
+    path('my-bookings/', UserBookingsView.as_view(), name='my_bookings'),
+
+    # Traveller (Trip) Management
+    path('travellors/add/', views.add_travellor, name='add_travellor'),
+    path('travellors/', views.list_travellors, name='list_travellors'),
+    path('travellors/<int:travellor_id>/edit/', views.edit_travellor, name='edit_travellor'),
+
+    # Route Management
+    path('routes/add/', views.manage_route, name='manage_route'),
+    path('routes/', views.list_routes, name='list_routes'),
+    path('routes/<int:route_id>/edit/', views.edit_route, name='edit_route'),
+
+    # Stop Management
+    path('stops/add/', views.create_stop, name='create_stop'),
+]
+

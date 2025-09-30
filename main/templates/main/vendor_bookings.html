@@ -1,0 +1,40 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>My Bookings</h2>
+    <hr>
+    {% if bookings %}
+        <table class="table table-striped table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Trip</th>
+                    <th>Customer</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Seats</th>
+                    <th>Status</th>
+                    <th>Booked On</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                    <tr>
+                        <td>{{ booking.trip }}</td>
+                        <td>{{ booking.customer.name }}</td>
+                        <td>{{ booking.start_stop.stop.name }}</td>
+                        <td>{{ booking.end_stop.stop.name }}</td>
+                        <td>{{ booking.seats }}</td>
+                        <td><span class="badge badge-{{ booking.status|lower }}">{{ booking.get_status_display }}</span></td>
+                        <td>{{ booking.booking_time|date:"Y-m-d H:i" }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            You have no bookings yet.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

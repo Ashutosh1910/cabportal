@@ -1,0 +1,229 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Edit Route{% endblock %}
+
+{% block page_title %}Edit Route{% endblock %}
+{% block page_subtitle %}Edit details and stops for {{ route.name }}{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'list_routes' %}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+    <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+    </svg>
+    Back to Routes
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="bg-white shadow sm:rounded-lg">
+    <form method="post" novalidate class="divide-y divide-gray-200">
+        {% csrf_token %}
+        
+        <!-- Route Details Section -->
+        <div class="px-4 py-5 sm:p-6">
+            <div class="space-y-8 divide-y divide-gray-200">
+                <div>
+                    <div>
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Route Information</h3>
+                        <p class="mt-1 text-sm text-gray-500">Basic details about the route and its operation.</p>
+                    </div>
+
+                    <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                        {% for field in form %}
+                        <div class="{% if field.name == 'description' %}sm:col-span-6{% else %}sm:col-span-3{% endif %}">
+                            <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                {{ field.label }}
+                            </label>
+                            <div class="mt-1">
+                                {% if field.field.widget.input_type == "text" %}
+                                    <input type="text" name="{{ field.html_name }}" id="{{ field.id_for_label }}" 
+                                           value="{{ field.value|default:'' }}"
+                                           class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                {% elif field.field.widget.input_type == "textarea" %}
+                                    <textarea name="{{ field.html_name }}" id="{{ field.id_for_label }}" rows="3"
+                                              class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">{{ field.value|default:'' }}</textarea>
+                                {% else %}
+                                    {{ field }}
+                                {% endif %}
+                            </div>
+                            {% if field.errors %}
+                            <p class="mt-2 text-sm text-red-600">
+                                {{ field.errors|join:", " }}
+                            </p>
+                            {% endif %}
+                            {% if field.help_text %}
+                            <p class="mt-2 text-sm text-gray-500">{{ field.help_text }}</p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stops Section -->
+        <div class="px-4 py-5 sm:p-6">
+            <div>
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Route Stops</h3>
+                <p class="mt-1 text-sm text-gray-500">Add and organize stops for this route. Drag to reorder.</p>
+            </div>
+
+            {{ formset.management_form }}
+
+            <div class="mt-6 space-y-4" id="stops-container">
+                {% for form in formset %}
+                <div class="border border-gray-200 rounded-lg shadow-sm bg-white overflow-hidden">
+                    <div class="px-4 py-5 sm:p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <span class="flex items-center justify-center h-8 w-8 rounded-full bg-indigo-100 text-indigo-600 text-sm font-medium">
+                                    {{ forloop.counter }}
+                                </span>
+                                <h4 class="ml-3 text-lg font-medium text-gray-900">Stop Details</h4>
+                            </div>
+                            <button type="button" class="text-gray-400 hover:text-gray-500" onclick="removeStop(this)">
+                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                            {% for field in form.visible_fields %}
+                            <div class="sm:col-span-3">
+                                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                    {{ field.label }}
+                                </label>
+                                <div class="mt-1">
+                                    {{ field }}
+                                </div>
+                                {% if field.errors %}
+                                <p class="mt-2 text-sm text-red-600">
+                                    {{ field.errors|join:", " }}
+                                </p>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                            {% for field in form.hidden_fields %}
+                                {{ field }}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="mt-6">
+                <button type="button" id="add-stop" 
+                        class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <svg class="-ml-1 mr-2 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Add Another Stop
+                </button>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
+            <div class="flex justify-end space-x-3">
+                <a href="{% url 'list_routes' %}" 
+                   class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Cancel
+                </a>
+                <button type="submit"
+                        class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Initialize form counter for dynamic form addition
+    window.formCount = parseInt('{{ formset.total_form_count }}');
+    window.maxForms = parseInt('{{ formset.max_num }}');
+
+    function removeStop(button) {
+        const stopContainer = button.closest('.border');
+        stopContainer.remove();
+        updateStopNumbers();
+        formCount--;
+        document.getElementById('id_form-TOTAL_FORMS').value = formCount;
+    }
+
+    function updateStopNumbers() {
+        document.querySelectorAll('#stops-container > div').forEach((stop, index) => {
+            const numberCircle = stop.querySelector('.rounded-full');
+            if (numberCircle) {
+                numberCircle.textContent = index + 1;
+            }
+        });
+    }
+
+    document.getElementById('add-stop').addEventListener('click', function() {
+        if (formCount >= maxForms) {
+            alert('Maximum number of stops reached');
+            return;
+        }
+
+        const template = document.querySelector('#stops-container > div').cloneNode(true);
+        const regex = /form-(\d+)/g;
+        
+        template.innerHTML = template.innerHTML.replace(regex, `form-${formCount}`);
+        template.querySelectorAll('input, select').forEach(input => {
+            input.value = '';
+            if (input.id) {
+                input.id = input.id.replace(regex, `form-${formCount}`);
+            }
+            if (input.name) {
+                input.name = input.name.replace(regex, `form-${formCount}`);
+            }
+        });
+
+        document.getElementById('stops-container').appendChild(template);
+        formCount++;
+        document.getElementById('id_form-TOTAL_FORMS').value = formCount;
+        updateStopNumbers();
+    });
+
+    // Enable drag and drop reordering
+    const stopsContainer = document.getElementById('stops-container');
+    let draggedItem = null;
+
+    stopsContainer.addEventListener('dragstart', function(e) {
+        draggedItem = e.target;
+        e.target.style.opacity = '0.5';
+    });
+
+    stopsContainer.addEventListener('dragend', function(e) {
+        e.target.style.opacity = '';
+    });
+
+    stopsContainer.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        const afterElement = getDragAfterElement(stopsContainer, e.clientY);
+        const draggable = document.querySelector('.dragging');
+        if (afterElement == null) {
+            stopsContainer.appendChild(draggedItem);
+        } else {
+            stopsContainer.insertBefore(draggedItem, afterElement);
+        }
+    });
+
+    function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.border:not(.dragging)')];
+
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+</script>
+{% endblock %}
