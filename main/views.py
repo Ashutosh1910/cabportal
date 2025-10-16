@@ -246,7 +246,7 @@ class SearchTravellersView(APIView):
                 schedule = traveller.get_schedule()
                 start_route_stop = next((item for item in schedule if item['stop_id'] == start_stop.id), None)
                 end_route_stop = next((item for item in schedule if item['stop_id'] == end_stop.id), None)
-
+                available_seats = traveller.vehicle_capacity-traveller.get_booked_seats_for_segment(start_route_stop['order'], end_route_stop['order'])  # To ensure validation
                 if start_route_stop and end_route_stop and start_route_stop['order'] < end_route_stop['order']:
                     serializer_context = {
                         'start_stop_id': start_stop.id,
@@ -257,6 +257,7 @@ class SearchTravellersView(APIView):
                     traveller_data['arrival_at_end'] = end_route_stop['estimated_arrival_time']
                     traveller_data['start_stop_id'] = start_route_stop['route_stop_id']
                     traveller_data['end_stop_id'] = end_route_stop['route_stop_id']
+                    traveller_data['available_seats'] = available_seats
                     valid_travellers_data.append(traveller_data)
             except Stop.DoesNotExist:
                 continue
