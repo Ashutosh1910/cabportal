@@ -161,7 +161,7 @@ class GoogleLogin(APIView):
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
                 'customer': CustomerSerializer(customer).data if customer else None
-            })
+            },status=200 if customer else 401)
         except ValueError:
             return Response({"error": "Invalid Google token"}, status=status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
@@ -169,7 +169,7 @@ class GoogleLogin(APIView):
 
 
 class CustomerSignupView(APIView):
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         if hasattr(request.user, 'customer_profile'):
