@@ -156,7 +156,7 @@ class GoogleLogin(APIView):
                 defaults={'username': email.split('@')[0]}
             )
             refresh = RefreshToken.for_user(user)
-            customer = Customer.objects.filter(user=request.user).first()
+            customer = Customer.objects.filter(user=user).first()
             return Response({
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
