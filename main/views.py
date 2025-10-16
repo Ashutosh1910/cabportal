@@ -165,11 +165,11 @@ class GoogleLogin(APIView):
         except ValueError:
             return Response({"error": "Invalid Google token"}, status=status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": "Customer does not exist"}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class CustomerSignupView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = []
 
     def post(self, request):
         if hasattr(request.user, 'customer_profile'):
