@@ -15,10 +15,10 @@
         </div>
         <div class="flex items-center space-x-2">
           {% if booking.status %}
-            {% if booking.status == 'CONFIRMED' %}
-              <span class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-green-100 text-green-800">{{ booking.get_status_display }}</span>
-            {% elif booking.status == 'CANCELLED' %}
-              <span class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-red-100 text-red-800">{{ booking.get_status_display }}</span>
+            {% if booking.status == 'BOOKED' %}
+              <span class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-green-100 text-green-800">BOOKED</span>
+            {% elif booking.status == 'CONFIRMED' %}
+              <span class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-red-100 text-red-800">CONFIRMED</span>
             {% else %}
               <span class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-yellow-100 text-yellow-800">{{ booking.get_status_display }}</span>
             {% endif %}
