@@ -278,7 +278,7 @@ def vendor_cab_bookings(request):
         return HttpResponseForbidden("You do not have permission to view this page.")
 
     # For now, show all unconfirmed/booked cab bookings so vendor can assign cars/drivers
-    bookings = CabBooking.objects.filter(status='BOOKED').order_by('pickup_time')
+    bookings = CabBooking.objects.filter().order_by('pickup_time')
     return render(request, 'main/vendor_cab_bookings.html', {'bookings': bookings})
 
 

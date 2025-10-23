@@ -259,3 +259,96 @@ This document provides documentation for all the API endpoints in the Cab Portal
 *   **Method**: `GET`
 *   **Description**: This is a server-side rendered page that displays all bookings for the trips created by the logged-in vendor. It is not a REST API endpoint.
 *   **Permissions**: `login_required`, `vendor_profile`
+
+---
+
+## Cab Bookings
+
+These endpoints allow authenticated customers to create cab bookings and retrieve their cab booking history. Vendor-side confirmation is done via the server-rendered admin/vendor pages in the application (`/vendor-cab-bookings/`), not via these REST endpoints.
+
+### Create a Cab Booking
+
+*   **URL**: `/cab-bookings/`
+*   **Method**: `POST`
+*   **Description**: Create a new cab booking for the authenticated user. The user must have a `Customer` profile. The operation is performed inside a database transaction to reduce race conditions.
+*   **Permissions**: `IsAuthenticated`
+*   **Request Body** (JSON):
+    *   `pickup_location` (string, required): Address or description of the pickup point.
+    *   `dropoff_location` (string, required): Address or description of the dropoff point.
+    *   `pickup_time` (string, required): ISO8601 datetime for when the user wants to be picked up (e.g. `"2025-10-01T09:30:00Z"`).
+    *   `car` (integer, optional): ID of a preferred `Car` (if you want to request a specific car).
+    ```json
+    {
+        "pickup_location": "123 Main St, City Center",
+        "dropoff_location": "Airport Terminal 1",
+        "pickup_time": "2025-10-01T09:30:00Z",
+        "car": 2
+    }
+    ```
+*   **Success Response (201 Created)**:
+    *   Returns the created `CabBooking` object. Fields explained below.
+    ```json
+    {
+        "id": 1,
+        "customer": 1,
+        "car": 2,
+        "pickup_location": "123 Main St, City Center",
+        "dropoff_location": "Airport Terminal 1",
+        "pickup_time": "2025-10-01T09:30:00Z",
+        "status": "BOOKED",
+        "booking_time": "2025-09-25T10:00:00Z",
+        "driver_name": null,
+        "driver_no": null
+    }
+    ```
+    Fields:
+    - `id` (integer): Booking id assigned by the server.
+    - `customer` (integer): The `Customer` id who created the booking.
+    - `car` (integer | null): The preferred `Car` id provided (or null if not provided).
+    - `pickup_location` / `dropoff_location` (string): Addresses.
+    - `pickup_time` (string): ISO8601 datetime of requested pickup.
+    - `status` (string): One of `BOOKED`, `CONFIRMED`, `CANCELLED`.
+    - `booking_time` (string): Server timestamp when booking was created.
+    - `driver_name`, `driver_no` (string | null): Filled when vendor assigns driver details.
+
+*   **Error Responses**:
+    *   `400 Bad Request` - validation errors e.g., missing required fields or invalid datetime format:
+    ```json
+    {
+        "pickup_time": ["This field is required."]
+    }
+    ```
+    *   `401 Unauthorized` - when the user is not authenticated.
+
+### List Current User's Cab Bookings
+
+*   **URL**: `/cab-bookings/`
+*   **Method**: `GET`
+*   **Description**: Returns a list of cab bookings created by the currently authenticated user, ordered by newest first.
+*   **Permissions**: `IsAuthenticated`
+*   **Success Response (200 OK)**:
+    *   Returns a list of detailed `CabBooking` objects. Example response shows `car` nested when available.
+    ```json
+    [
+        {
+            "id": 1,
+            "customer": 1,
+            "car": {
+                "id": 2,
+                "name": "Toyota Prius",
+                "license_plate": "XYZ-1234"
+            },
+            "pickup_location": "123 Main St, City Center",
+            "dropoff_location": "Airport Terminal 1",
+            "pickup_time": "2025-10-01T09:30:00Z",
+            "status": "CONFIRMED",
+            "booking_time": "2025-09-25T10:00:00Z",
+            "driver_name": "John Driver",
+            "driver_no": "+911234567890"
+        }
+    ]
+    ```
+
+*   Notes:
+    - Vendor confirmation (assignment of `car`, `driver_name`, `driver_no` and changing `status` to `CONFIRMED`) is performed in the server-rendered vendor tools (see `/vendor-cab-bookings/` and the confirm page at `/cab-bookings/<id>/confirm/`).
+
