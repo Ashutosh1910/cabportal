@@ -206,4 +206,35 @@ class Booking(models.Model):
         self.full_clean()
         super().save(*args, **kwargs)
 
+class Car(models.Model):
+    name=models.CharField(max_length=100)
+    license_plate=models.CharField(max_length=20)
+    
+    
+    def __str__(self):
+        return f"{self.name} ({self.license_plate})"
+    
+
+class CabBooking(models.Model):
+    """
+    Represents a cab booking made by a customer.
+    """
+    STATUS_CHOICES = [
+        ('CONFIRMED', 'Confirmed'),
+        ('BOOKED', 'Booked'),
+        ('CANCELLED', 'Cancelled'),
+    ]
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='cab_bookings')
+    pickup_location = models.TextField()
+    dropoff_location = models.TextField()
+    pickup_time = models.DateTimeField()
+    booking_time = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='BOOKED')
+    driver_no=models.CharField(max_length=15,null=True,blank=True)
+    driver_name=models.CharField(max_length=100,null=True,blank=True)
+    car = models.ForeignKey(Car, on_delete=models.CASCADE, related_name='cab_bookings',null=True,blank=True)
+
+    def __str__(self):
+        return f"Cab booking by {self.customer.name} from {self.pickup_location} to {self.dropoff_location}"
+
 

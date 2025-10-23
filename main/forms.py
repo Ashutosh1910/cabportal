@@ -1,6 +1,7 @@
 from django import forms
 from django.forms import inlineformset_factory
 from .models import Route, RouteStop, Travellor, Stop
+from .models import Car, CabBooking
 
 class TravellorForm(forms.ModelForm):
     """
@@ -60,3 +61,21 @@ RouteStopFormSet = inlineformset_factory(
     fk_name='route',
     fields=['stop', 'order', 'minutes_from_previous_stop', 'distance_from_previous_stop']
 )
+
+
+class CarForm(forms.ModelForm):
+    """
+    Form for creating or editing a Car.
+    """
+    class Meta:
+        model = Car
+        fields = ['name', 'license_plate']
+
+
+class CabBookingConfirmForm(forms.ModelForm):
+    """
+    Form used by vendors to confirm a CabBooking by assigning a car and driver details.
+    """
+    class Meta:
+        model = CabBooking
+        fields = ['car', 'driver_name', 'driver_no', 'status']

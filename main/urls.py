@@ -2,6 +2,8 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
 from .views import GoogleLogin, BookTravellerView, SearchTravellersView, StopListView, UserBookingsView, CustomerSignupView
+from .views import CabBookingView
+from .views import manage_cars, add_car, vendor_cab_bookings, confirm_cab_booking
 
 urlpatterns = [
     # Auth
@@ -13,6 +15,11 @@ urlpatterns = [
     path('vendor-bookings/', views.vendor_bookings_view, name='vendor_bookings'),
     path('search-travellers/', SearchTravellersView.as_view(), name='search_travellers'),
     path('stops/', StopListView.as_view(), name='stop_list'),
+    path('cab-bookings/', CabBookingView.as_view(), name='cab_bookings'),
+    path('cars/', manage_cars, name='manage_cars'),
+    path('cars/add/', add_car, name='add_car'),
+    path('vendor-cab-bookings/', vendor_cab_bookings, name='vendor_cab_bookings'),
+    path('cab-bookings/<int:booking_id>/confirm/', confirm_cab_booking, name='confirm_cab_booking'),
     path('my-bookings/', UserBookingsView.as_view(), name='my_bookings'),
 
     # Traveller (Trip) Management

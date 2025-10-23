@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Booking, Travellor, Stop, RouteStop, Customer
+from .models import Booking, Travellor, Stop, RouteStop, Customer, Car, CabBooking
 from django.contrib.auth.models import User
 from django.db.models import Sum
 
@@ -147,3 +147,44 @@ class BookingDetailSerializer(serializers.ModelSerializer):
 
         price_per_seat = total_distance * trip.cost_per_km
         return price_per_seat * obj.seats
+
+
+class CarSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Car
+        fields = ['id', 'name', 'license_plate']
+
+
+class CabBookingSerializer(serializers.ModelSerializer):
+    # Expose car id for selection and allow driver fields to be returned
+    car = serializers.PrimaryKeyRelatedField(queryset=Car.objects.all(), required=False, allow_null=True)
+
+    class Meta:
+        model = CabBooking
+        fields = ['id', 'customer', 'pickup_location', 'dropoff_location', 'pickup_time', 'status', 'driver_no', 'driver_name', 'car', 'booking_time']
+        read_only_fields = ('id', 'customer', 'status', 'booking_time')
+
+    def validate(self, data):
+        # pickup_time should be provided and should be in the future
+        pickup_time = data.get('pickup_time')
+        if pickup_time is None:
+            raise serializers.ValidationError({'pickup_time': 'Pickup time is required.'})
+        # Additional validations can be added here (e.g., location checks)
+        return data
+
+    def create(self, validated_data, **kwargs):
+        # allow view to pass customer via save(customer=...)
+        customer = kwargs.pop('customer', None)
+        if customer is None:
+            raise serializers.ValidationError('Customer must be provided')
+        validated_data['customer'] = customer
+        return super().create(validated_data)
+
+
+class CabBookingDetailSerializer(serializers.ModelSerializer):
+    customer = CustomerSerializer(read_only=True)
+    car = CarSerializer(read_only=True)
+
+    class Meta:
+        model = CabBooking
+        fields = ['id', 'customer', 'pickup_location', 'dropoff_location', 'pickup_time', 'booking_time', 'status', 'driver_no', 'driver_name', 'car']

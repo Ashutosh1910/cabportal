@@ -1,11 +1,21 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseForbidden
+from django.http import HttpRequest, HttpResponseForbidden
 from django.db import transaction
 from .forms import TravellorForm, RouteForm, RouteStopFormSet, StopForm
-from .models import Route, Travellor, Stop, Booking, Customer
-from .serializers import BookingSerializer, TravellorSerializer, StopSerializer, BookingDetailSerializer, CustomerSerializer
+from .forms import CarForm, CabBookingConfirmForm
+from .models import Route, Travellor, Stop, Booking, Customer, CabBooking
+from .models import Car
+from .serializers import (
+    BookingSerializer,
+    TravellorSerializer,
+    StopSerializer,
+    BookingDetailSerializer,
+    CustomerSerializer,
+    CabBookingSerializer,
+    CabBookingDetailSerializer,
+)
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -209,6 +219,88 @@ class StopListView(APIView):
         return Response(serializer.data)
 
 
+class CabBookingView(APIView):
+    """Create a new cab booking (POST) and list user's cab bookings (GET)."""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        # Create a cab booking; operation must be atomic to avoid double-booking issues
+        customer = get_object_or_404(Customer, user=request.user)
+        serializer = CabBookingSerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                with transaction.atomic():
+                    # serializer.create expects customer passed via kwargs
+                    cab_booking = serializer.create(serializer.validated_data, customer=customer)
+                    return Response(CabBookingDetailSerializer(cab_booking).data, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request):
+        # List current user's cab bookings
+        customer = get_object_or_404(Customer, user=request.user)
+        bookings = CabBooking.objects.filter(customer=customer).order_by('-booking_time')
+        serializer = CabBookingDetailSerializer(bookings, many=True)
+        return Response(serializer.data)
+
+
+@login_required
+def manage_cars(request):
+    """View for a vendor to add or list cars belonging to their company/vendor."""
+    if not hasattr(request.user, 'vendor_profile'):
+        return HttpResponseForbidden("You do not have permission to manage cars.")
+
+    cars = Car.objects.all().order_by('name')
+    return render(request, 'main/manage_cars.html', {'cars': cars})
+
+
+@login_required
+def add_car(request):
+    """Form view for vendors to add a new Car."""
+    if not hasattr(request.user, 'vendor_profile'):
+        return HttpResponseForbidden("You do not have permission to add cars.")
+
+    if request.method == 'POST':
+        form = CarForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('manage_cars')
+    else:
+        form = CarForm()
+    return render(request, 'main/add_car.html', {'form': form})
+
+
+@login_required
+def vendor_cab_bookings(request):
+    """Server-rendered page showing cab bookings for vendors to review and confirm."""
+    if not hasattr(request.user, 'vendor_profile'):
+        return HttpResponseForbidden("You do not have permission to view this page.")
+
+    # For now, show all unconfirmed/booked cab bookings so vendor can assign cars/drivers
+    bookings = CabBooking.objects.filter(status='BOOKED').order_by('pickup_time')
+    return render(request, 'main/vendor_cab_bookings.html', {'bookings': bookings})
+
+
+@login_required
+def confirm_cab_booking(request, booking_id):
+    """Allow vendor to assign a car and driver info to a CabBooking and confirm it."""
+    if not hasattr(request.user, 'vendor_profile'):
+        return HttpResponseForbidden("You do not have permission to confirm bookings.")
+
+    booking = get_object_or_404(CabBooking, id=booking_id)
+
+    if request.method == 'POST':
+        form = CabBookingConfirmForm(request.POST, instance=booking)
+        if form.is_valid():
+            form.save()
+            return redirect('vendor_cab_bookings')
+    else:
+        form = CabBookingConfirmForm(instance=booking)
+
+    return render(request, 'main/confirm_cab_booking.html', {'form': form, 'booking': booking})
+
+
 @login_required
 def vendor_bookings_view(request):
     if not hasattr(request.user, 'vendor_profile'):
@@ -273,4 +365,5 @@ class UserBookingsView(APIView):
         bookings = Booking.objects.filter(customer=customer).order_by('-booking_time')
         serializer = BookingDetailSerializer(bookings, many=True)
         return Response(serializer.data)
+
 
