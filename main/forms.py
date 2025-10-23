@@ -78,4 +78,4 @@ class CabBookingConfirmForm(forms.ModelForm):
     """
     class Meta:
         model = CabBooking
-        fields = ['car', 'driver_name', 'driver_no', 'status']
+        fields = ['car', 'driver_name', 'driver_no', ]
