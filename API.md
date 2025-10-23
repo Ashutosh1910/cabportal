@@ -276,13 +276,13 @@ These endpoints allow authenticated customers to create cab bookings and retriev
     *   `pickup_location` (string, required): Address or description of the pickup point.
     *   `dropoff_location` (string, required): Address or description of the dropoff point.
     *   `pickup_time` (string, required): ISO8601 datetime for when the user wants to be picked up (e.g. `"2025-10-01T09:30:00Z"`).
-    *   `car` (integer, optional): ID of a preferred `Car` (if you want to request a specific car).
+    *   `people_count` (integer, required): Number of passengers for this booking (must be >= 1).
     ```json
     {
         "pickup_location": "123 Main St, City Center",
         "dropoff_location": "Airport Terminal 1",
         "pickup_time": "2025-10-01T09:30:00Z",
-        "car": 2
+        "people_count": 2
     }
     ```
 *   **Success Response (201 Created)**:
@@ -291,7 +291,7 @@ These endpoints allow authenticated customers to create cab bookings and retriev
     {
         "id": 1,
         "customer": 1,
-        "car": 2,
+        "people_count": 2,
         "pickup_location": "123 Main St, City Center",
         "dropoff_location": "Airport Terminal 1",
         "pickup_time": "2025-10-01T09:30:00Z",

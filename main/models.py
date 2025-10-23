@@ -228,6 +228,7 @@ class CabBooking(models.Model):
     pickup_location = models.TextField()
     dropoff_location = models.TextField()
     pickup_time = models.DateTimeField()
+    people_count = models.PositiveIntegerField(default=1)
     booking_time = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='BOOKED')
     driver_no=models.CharField(max_length=15,null=True,blank=True)

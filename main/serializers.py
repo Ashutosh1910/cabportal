@@ -157,18 +157,29 @@ class CarSerializer(serializers.ModelSerializer):
 
 class CabBookingSerializer(serializers.ModelSerializer):
     # Expose car id for selection and allow driver fields to be returned
+    # For customer booking, they provide people_count (number of passengers).
+    # `car` remains optional but is not required when creating a booking.
     car = serializers.PrimaryKeyRelatedField(queryset=Car.objects.all(), required=False, allow_null=True)
+    people_count = serializers.IntegerField(required=True, min_value=1)
 
     class Meta:
         model = CabBooking
-        fields = ['id', 'customer', 'pickup_location', 'dropoff_location', 'pickup_time', 'status', 'driver_no', 'driver_name', 'car', 'booking_time']
-        read_only_fields = ('id', 'customer', 'status', 'booking_time')
+        fields = ['id', 'customer', 'pickup_location', 'dropoff_location', 'pickup_time', 'people_count', 'status', 'driver_no', 'driver_name', 'car', 'booking_time']
+        read_only_fields = ('id', 'customer', 'status', 'booking_time','driver_no', 'driver_name', 'car',)
 
     def validate(self, data):
-        # pickup_time should be provided and should be in the future
+        # pickup_time should be provided
         pickup_time = data.get('pickup_time')
         if pickup_time is None:
             raise serializers.ValidationError({'pickup_time': 'Pickup time is required.'})
+
+        # people_count must be a positive integer
+        people_count = data.get('people_count')
+        if people_count is None:
+            raise serializers.ValidationError({'people_count': 'people_count is required.'})
+        if not isinstance(people_count, int) or people_count < 1:
+            raise serializers.ValidationError({'people_count': 'people_count must be an integer >= 1.'})
+
         # Additional validations can be added here (e.g., location checks)
         return data
 
@@ -184,7 +195,8 @@ class CabBookingSerializer(serializers.ModelSerializer):
 class CabBookingDetailSerializer(serializers.ModelSerializer):
     customer = CustomerSerializer(read_only=True)
     car = CarSerializer(read_only=True)
+    people_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = CabBooking
-        fields = ['id', 'customer', 'pickup_location', 'dropoff_location', 'pickup_time', 'booking_time', 'status', 'driver_no', 'driver_name', 'car']
+        fields = ['id', 'customer', 'pickup_location', 'dropoff_location', 'pickup_time', 'people_count', 'booking_time', 'status', 'driver_no', 'driver_name', 'car']
