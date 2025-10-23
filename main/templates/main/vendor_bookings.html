@@ -1,40 +1,50 @@
 {% extends 'main/base.html' %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2>My Bookings</h2>
-    <hr>
+<div class="max-w-6xl mx-auto mt-8 px-4">
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-2xl font-semibold">My Bookings</h2>
+    </div>
+
     {% if bookings %}
-        <table class="table table-striped table-hover">
-            <thead class="thead-dark">
+    <div class="overflow-x-auto bg-white rounded-lg shadow">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
                 <tr>
-                    <th>Trip</th>
-                    <th>Customer</th>
-                    <th>From</th>
-                    <th>To</th>
-                    <th>Seats</th>
-                    <th>Status</th>
-                    <th>Booked On</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trip</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">From</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">To</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Seats</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booked On</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="bg-white divide-y divide-gray-200">
                 {% for booking in bookings %}
-                    <tr>
-                        <td>{{ booking.trip }}</td>
-                        <td>{{ booking.customer.name }}</td>
-                        <td>{{ booking.start_stop.stop.name }}</td>
-                        <td>{{ booking.end_stop.stop.name }}</td>
-                        <td>{{ booking.seats }}</td>
-                        <td><span class="badge badge-{{ booking.status|lower }}">{{ booking.get_status_display }}</span></td>
-                        <td>{{ booking.booking_time|date:"Y-m-d H:i" }}</td>
-                    </tr>
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ booking.trip }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ booking.customer.name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ booking.start_stop.stop.name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ booking.end_stop.stop.name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ booking.seats }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if booking.status == 'CONFIRMED' %}
+                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-green-100 text-green-800">{{ booking.get_status_display }}</span>
+                        {% elif booking.status == 'COMPLETED' %}
+                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-gray-100 text-gray-800">{{ booking.get_status_display }}</span>
+                        {% else %}
+                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-yellow-100 text-yellow-800">{{ booking.get_status_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ booking.booking_time|date:"Y-m-d H:i" }}</td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
+    </div>
     {% else %}
-        <div class="alert alert-info" role="alert">
-            You have no bookings yet.
-        </div>
+    <div class="mt-6 bg-white rounded-lg shadow p-6 text-gray-600">You have no bookings yet.</div>
     {% endif %}
 </div>
 {% endblock %}

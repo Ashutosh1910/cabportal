@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import Vendor, Customer, Stop, Route, RouteStop, Travellor, Booking
+from .models import Car, CabBooking
 
 # To enhance the Route management, we'll show the stops inline
 class RouteStopInline(admin.TabularInline):
@@ -69,4 +70,20 @@ class RouteStopAdmin(admin.ModelAdmin):
     list_display = ('route', 'stop', 'order', 'minutes_from_previous_stop', 'distance_from_previous_stop')
     list_filter = ('route',)
     search_fields = ('route__name', 'stop__name')
+
+
+@admin.register(Car)
+class CarAdmin(admin.ModelAdmin):
+    """Admin for Car model."""
+    list_display = ('id', 'name', 'license_plate')
+    search_fields = ('name', 'license_plate')
+
+
+@admin.register(CabBooking)
+class CabBookingAdmin(admin.ModelAdmin):
+    """Admin for CabBooking model."""
+    list_display = ('id', 'customer', 'pickup_location', 'dropoff_location', 'pickup_time', 'status', 'car', 'driver_name')
+    list_filter = ('status',)
+    search_fields = ('customer__name', 'pickup_location', 'dropoff_location', 'driver_name')
+    readonly_fields = ('booking_time',)
 
