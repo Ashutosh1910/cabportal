@@ -317,6 +317,32 @@
                                 </svg>
                                 Bookings
                             </a>
+                            {% if user.is_authenticated and user.vendor_profile %}
+                            <a href="{% url 'manage_cars' %}"
+                               class="px-4 py-2 inline-flex items-center border-b-2 text-sm font-medium
+                                    {% if request.resolver_match.url_name == 'manage_cars' %}
+                                        border-primary-500 text-primary-600
+                                    {% else %}
+                                        border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700
+                                    {% endif %}">
+                                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 13l2-2 4 4 8-8 4 4V3H3z" />
+                                </svg>
+                                Cars
+                            </a>
+                            <a href="{% url 'vendor_cab_bookings' %}"
+                               class="px-4 py-2 inline-flex items-center border-b-2 text-sm font-medium
+                                    {% if request.resolver_match.url_name == 'vendor_cab_bookings' %}
+                                        border-primary-500 text-primary-600
+                                    {% else %}
+                                        border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700
+                                    {% endif %}">
+                                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M5 6h14M5 14h14M7 18h10" />
+                                </svg>
+                                Cab Bookings
+                            </a>
+                            {% endif %}
                         </div>
                     </div>
                     <div class="hidden md:ml-6 md:flex md:items-center">
