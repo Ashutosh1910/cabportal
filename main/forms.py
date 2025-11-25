@@ -9,7 +9,9 @@ class TravellorForm(forms.ModelForm):
     """
     class Meta:
         model = Travellor
-        fields = ['route', 'departure_time', 'vehicle_capacity','cost_per_km']
+        # Include all non-nullable Travellor fields here. `driver` is
+        # excluded because it's set in the view (`request.user`).
+        fields = ['route', 'departure_time', 'vehicle_capacity', 'cost_per_km',]
         widgets = {
             'departure_time': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
         }

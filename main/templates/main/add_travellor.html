@@ -97,6 +97,31 @@
                     <p class="mt-2 text-sm text-gray-500">{{ form.vehicle_capacity.help_text }}</p>
                     {% endif %}
                 </div>
+
+                <!-- Cost per km -->
+                <div class="sm:col-span-3">
+                    <label for="{{ form.cost_per_km.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                        {{ form.cost_per_km.label|default:"Cost per km" }}
+                    </label>
+                    <div class="mt-1">
+                        <input type="number"
+                               id="{{ form.cost_per_km.id_for_label }}"
+                               name="{{ form.cost_per_km.html_name }}"
+                               value="{{ form.cost_per_km.value|default:'' }}"
+                               step="0.01"
+                               min="0"
+                               class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                               placeholder="Enter price per km">
+                    </div>
+                    {% if form.cost_per_km.errors %}
+                    <p class="mt-2 text-sm text-red-600">
+                        {{ form.cost_per_km.errors.0 }}
+                    </p>
+                    {% endif %}
+                    {% if form.cost_per_km.help_text %}
+                    <p class="mt-2 text-sm text-gray-500">{{ form.cost_per_km.help_text }}</p>
+                    {% endif %}
+                </div>
             </div>
         </div>
 
