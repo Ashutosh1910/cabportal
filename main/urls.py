@@ -18,7 +18,7 @@ urlpatterns = [
     path('cab-bookings/', CabBookingView.as_view(), name='cab_bookings'),
     path('cars/', manage_cars, name='manage_cars'),
     path('cars/add/', add_car, name='add_car'),
-    path('vendor-cab-bookings/', vendor_cab_bookings, name='vendor_cab_bookings'),
+    path('', vendor_cab_bookings, name='vendor_cab_bookings'),
     path('cab-bookings/<int:booking_id>/confirm/', confirm_cab_booking, name='confirm_cab_booking'),
     path('my-bookings/', UserBookingsView.as_view(), name='my_bookings'),
 
