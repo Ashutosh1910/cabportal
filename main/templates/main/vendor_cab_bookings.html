@@ -24,7 +24,9 @@
               <span class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-yellow-100 text-yellow-800">{{ booking.get_status_display }}</span>
             {% endif %}
           {% endif %}
+          {% if booking.status == 'BOOKED' %}
           <a href="{% url 'confirm_cab_booking' booking.id %}" class="px-3 py-2 bg-blue-600 text-white rounded">Confirm</a>
+          {% endif %}
         </div>
       </div>
     </div>

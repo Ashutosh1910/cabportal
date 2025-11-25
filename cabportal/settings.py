@@ -165,5 +165,8 @@ SIMPLE_JWT = {
 JWT_AUTH = {
     "JWT_VERIFY_EXPIRATION": False,
 }
-LOGIN_REDIRECT_URL = 'add_travellor' 
+# After login, redirect users to the vendor cab bookings page by default
+LOGIN_REDIRECT_URL = '/vendor-cab-bookings/'
+# After logout, redirect users to the login page
+LOGOUT_REDIRECT_URL = '/login/'
 GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')

@@ -344,6 +344,18 @@
                             </a>
                             {% endif %}
                         </div>
+                        <!-- Mobile menu button (small screens) -->
+                        <div class="flex items-center md:hidden">
+                            <button id="mobile-menu-button" type="button" aria-expanded="false" aria-controls="mobile-menu" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500">
+                                <span class="sr-only">Open main menu</span>
+                                <svg id="mobile-open" class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                                <svg id="mobile-close" class="h-6 w-6 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                     <div class="hidden md:ml-6 md:flex md:items-center">
                         <div class="ml-3 relative flex items-center space-x-4">
@@ -465,6 +477,48 @@
                 });
             });
         });
+
+        // Mobile menu toggle
+        (function () {
+            var btn = document.getElementById('mobile-menu-button');
+            var menu = document.getElementById('mobile-menu');
+            var openIcon = document.getElementById('mobile-open');
+            var closeIcon = document.getElementById('mobile-close');
+            if (!btn) return;
+            btn.addEventListener('click', function () {
+                if (!menu) {
+                    // create menu dynamically if not present
+                    menu = document.createElement('div');
+                    menu.id = 'mobile-menu';
+                    menu.className = 'md:hidden bg-white border-t border-gray-200';
+                    menu.innerHTML = `
+                        <div class="pt-2 pb-3 space-y-1">
+                            <a href="{% url 'list_travellors' %}" class="block pl-3 pr-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-50">My Trips</a>
+                            <a href="{% url 'list_routes' %}" class="block pl-3 pr-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-50">Routes</a>
+                            <a href="{% url 'vendor_bookings' %}" class="block pl-3 pr-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-50">Bookings</a>
+                            {% if user.is_authenticated and user.vendor_profile %}
+                            <a href="{% url 'manage_cars' %}" class="block pl-3 pr-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-50">Cars</a>
+                            <a href="{% url 'vendor_cab_bookings' %}" class="block pl-3 pr-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-50">Cab Bookings</a>
+                            {% endif %}
+                        </div>
+                    `;
+                    var nav = document.querySelector('nav');
+                    if (nav && nav.parentNode) nav.parentNode.insertBefore(menu, nav.nextSibling);
+                }
+                var hidden = menu.classList.contains('hidden');
+                if (hidden) {
+                    menu.classList.remove('hidden');
+                    if (openIcon) openIcon.classList.add('hidden');
+                    if (closeIcon) closeIcon.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                } else {
+                    menu.classList.add('hidden');
+                    if (openIcon) openIcon.classList.remove('hidden');
+                    if (closeIcon) closeIcon.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+        })();
     </script>
 </body>
 </html>
