@@ -269,6 +269,7 @@
     <div class="min-h-full">
         <!-- Navigation -->
         <nav class="bg-white border-b border-gray-200">
+         {% if user.is_authenticated and user.vendor_profile %}
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between h-16">
                     <div class="flex">
@@ -317,7 +318,7 @@
                                 </svg>
                                 Bookings
                             </a>
-                            {% if user.is_authenticated and user.vendor_profile %}
+                           
                             <a href="{% url 'manage_cars' %}"
                                class="px-4 py-2 inline-flex items-center border-b-2 text-sm font-medium
                                     {% if request.resolver_match.url_name == 'manage_cars' %}
@@ -342,7 +343,7 @@
                                 </svg>
                                 Cab Bookings
                             </a>
-                            {% endif %}
+                           
                         </div>
                         <!-- Mobile menu button (small screens) -->
                         <div class="flex items-center md:hidden">
@@ -374,6 +375,7 @@
                     </div>
                 </div>
             </div>
+             {% endif %}
         </nav>
 
         <header class="bg-white shadow-sm">
