@@ -71,28 +71,28 @@ class TravellorSerializer(serializers.ModelSerializer):
         return RouteStopSerializer(route_stops, many=True).data
 
     def get_price(self, obj):
-        start_stop_id = self.context.get('start_stop_id')
-        end_stop_id = self.context.get('end_stop_id')
+        # start_stop_id = self.context.get('start_stop_id')
+        # end_stop_id = self.context.get('end_stop_id')
 
-        if not start_stop_id or not end_stop_id:
-            return None
+        # if not start_stop_id or not end_stop_id:
+        #     return None
 
-        try:
-            start_stop = RouteStop.objects.get(route=obj.route, stop_id=start_stop_id)
-            end_stop = RouteStop.objects.get(route=obj.route, stop_id=end_stop_id)
-        except RouteStop.DoesNotExist:
-            return None
+        # try:
+        #     start_stop = RouteStop.objects.get(route=obj.route, stop_id=start_stop_id)
+        #     end_stop = RouteStop.objects.get(route=obj.route, stop_id=end_stop_id)
+        # except RouteStop.DoesNotExist:
+        #     return None
 
-        if start_stop.order >= end_stop.order:
-            return None
+        # if start_stop.order >= end_stop.order:
+        #     return None
 
-        total_distance = RouteStop.objects.filter(
-            route=obj.route,
-            order__gt=start_stop.order,
-            order__lte=end_stop.order
-        ).aggregate(total=Sum('distance_from_previous_stop'))['total'] or 0
+        # total_distance = RouteStop.objects.filter(
+        #     route=obj.route,
+        #     order__gt=start_stop.order,
+        #     order__lte=end_stop.order
+        # ).aggregate(total=Sum('distance_from_previous_stop'))['total'] or 0
 
-        return total_distance * obj.cost_per_km
+        return obj.cost_per_km
 
 
 
