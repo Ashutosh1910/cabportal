@@ -187,11 +187,12 @@ This document provides documentation for all the API endpoints in the Cab Portal
 
 *   **URL**: `/search-travellers/`
 *   **Method**: `GET`
-*   **Description**: Searches for available travellers between two stops.
+*   **Description**: Searches for available travellers between two stops, optionally filtered by travel date.
 *   **Permissions**: `IsAuthenticated`
 *   **Query Parameters**:
     *   `start_stop_id` (integer, required): The ID of the start `Stop`.
     *   `end_stop_id` (integer, required): The ID of the end `Stop`.
+    *   `date` (string, optional): Filter travellers departing on this date. Format: `YYYY-MM-DD` (e.g., `2025-10-01`).
 *   **Success Response (200 OK)**:
     *   Returns a list of `Travellor` objects that match the search criteria.
     ```json

@@ -92,7 +92,7 @@ class TravellorSerializer(serializers.ModelSerializer):
         #     order__lte=end_stop.order
         # ).aggregate(total=Sum('distance_from_previous_stop'))['total'] or 0
 
-        return obj.cost_per_km
+        return int(obj.cost_per_km)
 
 
 
@@ -139,14 +139,8 @@ class BookingDetailSerializer(serializers.ModelSerializer):
         if not all([start_stop, end_stop, trip]):
             return None
 
-        total_distance = RouteStop.objects.filter(
-            route=trip.route,
-            order__gt=start_stop.order,
-            order__lte=end_stop.order
-        ).aggregate(total=Sum('distance_from_previous_stop'))['total'] or 0
 
-        price_per_seat = total_distance * trip.cost_per_km
-        return price_per_seat * obj.seats
+        return trip.cost_per_km 
 
 
 class CarSerializer(serializers.ModelSerializer):

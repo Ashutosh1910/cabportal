@@ -194,6 +194,7 @@ class CustomerSignupView(APIView):
 
 from rest_framework.permissions import IsAuthenticated
 from django.core.exceptions import ValidationError
+from datetime import datetime, timedelta
 
 class BookTravellerView(APIView):
     permission_classes = [IsAuthenticated]
@@ -317,6 +318,7 @@ class SearchTravellersView(APIView):
     def get(self, request):
         start_stop_id = request.query_params.get('start_stop_id')
         end_stop_id = request.query_params.get('end_stop_id')
+        travel_date = request.query_params.get('date')  # Expected format: YYYY-MM-DD
 
         if not start_stop_id or not end_stop_id:
             return Response({"error": "Both start_stop_id and end_stop_id are required."}, status=status.HTTP_400_BAD_REQUEST)
@@ -332,6 +334,16 @@ class SearchTravellersView(APIView):
 
         # Filter travellers on these routes
         travellers = Travellor.objects.filter(route__in=routes, status='SCHEDULED')
+
+        # Filter by date if provided
+        if travel_date:
+            try:
+                date_obj = datetime.strptime(travel_date, '%Y-%m-%d').date()
+                day_start = datetime.combine(date_obj, datetime.min.time())
+                day_end = datetime.combine(date_obj, datetime.max.time())
+                travellers = travellers.filter(departure_time__gte=day_start, departure_time__lte=day_end)
+            except ValueError:
+                return Response({"error": "Invalid date format. Use YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
 
         # Further filter to ensure the stop order is correct and calculate arrival times
         valid_travellers_data = []
