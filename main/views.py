@@ -26,6 +26,11 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.conf import settings
 from rest_framework.permissions import IsAuthenticated
 from django.core.exceptions import ValidationError  
+from rest_framework.permissions import IsAuthenticated
+from django.core.exceptions import ValidationError
+from datetime import datetime, timedelta
+import calendar
+
 # --- Stop Management ---
 
 @login_required
@@ -239,13 +244,6 @@ class CustomerSignupView(APIView):
             return Response(CustomerSerializer(customer).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-from rest_framework.permissions import IsAuthenticated
-from django.core.exceptions import ValidationError
-from datetime import datetime, timedelta
-import calendar
-
-
 class BookTravellerView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -366,6 +364,7 @@ def vendor_bookings_view(request):
 class SearchTravellersView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
+        cust=get_object_or_404(Customer, user=request.user)
         start_stop_id = request.query_params.get('start_stop_id')
         end_stop_id = request.query_params.get('end_stop_id')
         travel_date = request.query_params.get('date')  # Expected format: YYYY-MM-DD
@@ -427,7 +426,7 @@ class UserBookingsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        customer = Customer.objects.get(user=request.user)
+        customer = get_object_or_404(Customer, user=request.user)
         bookings = Booking.objects.filter(customer=customer).order_by('-booking_time')
         serializer = BookingDetailSerializer(bookings, many=True)
         return Response(serializer.data)
