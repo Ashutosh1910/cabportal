@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponseForbidden
 from django.db import transaction
 from .forms import TravellorForm, RouteForm, RouteStopFormSet, StopForm
-from .forms import CarForm, CabBookingConfirmForm
+from .forms import CarForm, CabBookingConfirmForm, BulkTravellorForm
 from .models import Route, Travellor, Stop, Booking, Customer, CabBooking
 from .models import Car
 from .serializers import (
@@ -95,6 +95,54 @@ def edit_travellor(request, travellor_id):
         form = TravellorForm(instance=travellor)
 
     return render(request, 'main/edit_travellor.html', {'form': form, 'travellor': travellor})
+
+
+@login_required
+def bulk_add_travellor(request):
+    """View for a vendor to create daily trips for an entire month."""
+    if not hasattr(request.user, 'vendor_profile'):
+        return HttpResponseForbidden("You do not have permission to add trips.")
+
+    if request.method == 'POST':
+        form = BulkTravellorForm(request.POST)
+        if form.is_valid():
+            route = form.cleaned_data['route']
+            departure_time = form.cleaned_data['departure_time']
+            month = int(form.cleaned_data['month'])
+            year = int(form.cleaned_data['year'])
+            vehicle_capacity = form.cleaned_data['vehicle_capacity']
+            cost_per_km = form.cleaned_data['cost_per_km']
+
+            days_in_month = calendar.monthrange(year, month)[1]
+            trips_created = 0
+
+            with transaction.atomic():
+                for day in range(1, days_in_month + 1):
+                    departure_datetime = datetime(
+                        year=year,
+                        month=month,
+                        day=day,
+                        hour=departure_time.hour,
+                        minute=departure_time.minute
+                    )
+                    Travellor.objects.create(
+                        driver=request.user,
+                        route=route,
+                        departure_time=departure_datetime,
+                        vehicle_capacity=vehicle_capacity,
+                        cost_per_km=cost_per_km,
+                        status='SCHEDULED'
+                    )
+                    trips_created += 1
+
+            return render(request, 'main/bulk_add_travellor.html', {
+                'form': BulkTravellorForm(),
+                'success_message': f'Successfully created {trips_created} trips for {calendar.month_name[month]} {year}.'
+            })
+    else:
+        form = BulkTravellorForm()
+
+    return render(request, 'main/bulk_add_travellor.html', {'form': form})
 
 
 # --- Route Management ---
@@ -195,6 +243,8 @@ class CustomerSignupView(APIView):
 from rest_framework.permissions import IsAuthenticated
 from django.core.exceptions import ValidationError
 from datetime import datetime, timedelta
+import calendar
+
 
 class BookTravellerView(APIView):
     permission_classes = [IsAuthenticated]

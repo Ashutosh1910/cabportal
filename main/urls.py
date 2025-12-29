@@ -24,6 +24,7 @@ urlpatterns = [
 
     # Traveller (Trip) Management
     path('travellors/add/', views.add_travellor, name='add_travellor'),
+    path('travellors/bulk-add/', views.bulk_add_travellor, name='bulk_add_travellor'),
     path('travellors/', views.list_travellors, name='list_travellors'),
     path('travellors/<int:travellor_id>/edit/', views.edit_travellor, name='edit_travellor'),
 

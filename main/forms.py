@@ -2,6 +2,9 @@ from django import forms
 from django.forms import inlineformset_factory
 from .models import Route, RouteStop, Travellor, Stop
 from .models import Car, CabBooking
+import calendar
+from datetime import datetime
+
 
 class TravellorForm(forms.ModelForm):
     """
@@ -81,3 +84,54 @@ class CabBookingConfirmForm(forms.ModelForm):
     class Meta:
         model = CabBooking
         fields = ['car', 'driver_name', 'driver_no', ]
+
+
+class BulkTravellorForm(forms.Form):
+    """
+    Form for creating daily trips for an entire month.
+    """
+    MONTH_CHOICES = [
+        (1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'),
+        (5, 'May'), (6, 'June'), (7, 'July'), (8, 'August'),
+        (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December'),
+    ]
+
+    route = forms.ModelChoiceField(
+        queryset=Route.objects.all(),
+        label="Select a Route",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    departure_time = forms.TimeField(
+        label="Daily Departure Time",
+        widget=forms.TimeInput(attrs={'type': 'time'})
+    )
+    month = forms.ChoiceField(
+        choices=MONTH_CHOICES,
+        label="Month",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    year = forms.IntegerField(
+        label="Year",
+        min_value=2024,
+        max_value=2100,
+        initial=datetime.now().year,
+        widget=forms.NumberInput(attrs={'class': 'form-input'})
+    )
+    vehicle_capacity = forms.IntegerField(
+        label="Vehicle Capacity",
+        min_value=1,
+        widget=forms.NumberInput(attrs={'class': 'form-input', 'placeholder': 'e.g., 10'})
+    )
+    cost_per_km = forms.DecimalField(
+        label="Cost per Kilometer",
+        max_digits=6,
+        decimal_places=2,
+        min_value=0,
+        widget=forms.NumberInput(attrs={'class': 'form-input', 'placeholder': 'e.g., 2.50', 'step': '0.01'})
+    )
+
+    def get_days_in_month(self):
+        """Returns the number of days in the selected month/year."""
+        month = int(self.cleaned_data['month'])
+        year = int(self.cleaned_data['year'])
+        return calendar.monthrange(year, month)[1]
