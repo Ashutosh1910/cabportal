@@ -383,12 +383,14 @@ class SearchTravellersView(APIView):
         routes = Route.objects.filter(stops=start_stop).filter(stops=end_stop)
 
         # Filter travellers on these routes
-        travellers = Travellor.objects.filter(route__in=routes, status='SCHEDULED')
+        travellers = Travellor.objects.filter(route__in=routes, status='SCHEDULED', departure_time__gte=datetime.now()).order_by('departure_time')
 
         # Filter by date if provided
         if travel_date:
             try:
                 date_obj = datetime.strptime(travel_date, '%Y-%m-%d').date()
+                if date_obj < datetime.now().date():
+                    return Response({"error": "Travel date cannot be in the past."}, status=status.HTTP_400_BAD_REQUEST)
                 day_start = datetime.combine(date_obj, datetime.min.time())
                 day_end = datetime.combine(date_obj, datetime.max.time())
                 travellers = travellers.filter(departure_time__gte=day_start, departure_time__lte=day_end)

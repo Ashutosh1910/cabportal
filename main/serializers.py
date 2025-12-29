@@ -1,3 +1,4 @@
+from datetime import timezone
 from rest_framework import serializers
 from .models import Booking, Travellor, Stop, RouteStop, Customer, Car, CabBooking
 from django.contrib.auth.models import User
@@ -19,7 +20,8 @@ class BookingSerializer(serializers.ModelSerializer):
         """
         if data['start_stop'].order >= data['end_stop'].order:
             raise serializers.ValidationError("End stop must be after start stop.")
-        
+        if data['trip'].departure_time < timezone.now():
+            raise serializers.ValidationError("Cannot book a trip that has already departed.")
         if data['start_stop'].route != data['trip'].route or data['end_stop'].route != data['trip'].route:
             raise serializers.ValidationError("Stops must be on the trip's route.")
 
@@ -140,7 +142,7 @@ class BookingDetailSerializer(serializers.ModelSerializer):
             return None
 
 
-        return trip.cost_per_km 
+        return trip.cost_per_km *obj.seats
 
 
 class CarSerializer(serializers.ModelSerializer):
@@ -166,7 +168,8 @@ class CabBookingSerializer(serializers.ModelSerializer):
         pickup_time = data.get('pickup_time')
         if pickup_time is None:
             raise serializers.ValidationError({'pickup_time': 'Pickup time is required.'})
-
+        if pickup_time < timezone.now():
+            raise serializers.ValidationError({'pickup_time': 'Pickup time must be in the future.'})
         # people_count must be a positive integer
         people_count = data.get('people_count')
         if people_count is None:
